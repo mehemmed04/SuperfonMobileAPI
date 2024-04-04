@@ -1,0 +1,48 @@
+﻿@model GroupMenuPermissionDTO
+@{
+}
+
+
+@using (Html.BeginForm(actionName:"AddGroupMenuPermission",controllerName:"Users", method: FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.GroupId)
+        <div class="form-group">
+        <div class="mb-2">@Model.GroupName</div>
+        <div class="col-md-10">
+            <select id="drpEmpList" class="form-control" asp-for="MenuPermissionIdAdd" asp-items="@(new SelectList(ViewData["AllMenuPermissions"] as IEnumerable<MenuPermissionReadDTO> , "MenuPermissionId", "PermissionName"))">  
+                    <option value="">--Seçin--</option>  
+            </select>  
+                <input type="hidden" asp-for="MenuPermissionIdAdd" />  
+        </div>
+    </div>
+
+    <input type="submit" value="Əlavə Et" class="btn btn-success" />
+</div>
+}
+
+
+
+<table class="table table-bordered table-responsive table-hover">
+    <tr>
+        <th>Id </th>
+        <th>Səlahiyyət Adı </th>
+        <th></th>
+    </tr>
+    @foreach (var d in Model.MenuPermissions)
+    {
+<tr>
+    <td>@d.MenuPermissionId</td>
+    <td>@d.PermissionName</td>
+    <td>@using (Html.BeginForm(actionName: "DeleteGroupMenuPermission",controllerName: "Users", method: FormMethod.Post,routeValues: new Dictionary<string, object> { { "groupId",Model.GroupId },{ "menuPermissionId",d.MenuPermissionId } }))
+                {  <input type="submit" value="Sil">
+    }
+    </td>
+</tr>
+
+    }
+</table>

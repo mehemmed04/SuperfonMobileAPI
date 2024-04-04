@@ -1,0 +1,31 @@
+using System;
+using System.Collections.Generic;
+
+namespace SuperfonWorks.Data.Entities
+{
+    public partial class UserWarehousePermission
+    {
+        public UserWarehousePermission()
+        {
+            #region Generated Constructor
+            #endregion
+        }
+
+        #region Generated Properties
+        public int UserWarehousePermissionId { get; set; }
+
+        public byte WarehousePermissionTypeId { get; set; }
+
+        public int WarehouseNumber { get; set; }
+
+        public int UserId { get; set; }
+
+        #endregion
+
+        #region Generated Relationships
+        public virtual User User { get; set; }
+
+        #endregion
+
+    }
+}
