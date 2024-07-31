@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  superfonmobileapi:
+    build:
+      context: "C:\\Users\\Arshad\\source\\repos\\SuperfonMobileAPI"
+      dockerfile: "SuperfonMobileAPI/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net5.0/SuperfonMobileAPI.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "superfonmobileapi:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\Arshad\\.nuget\\packages:/root/.nuget/packages"
+    - "C:\\Users\\Arshad\\source\\repos\\SuperfonMobileAPI\\SuperfonMobileAPI:/app:rw"
+    - "C:\\Users\\Arshad\\source\\repos\\SuperfonMobileAPI:/src:rw"
+    working_dir: "/app"

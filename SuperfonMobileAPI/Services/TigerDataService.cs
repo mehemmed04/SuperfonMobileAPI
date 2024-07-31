@@ -1640,18 +1640,41 @@ and Convert(int,LEFT(Convert(varchar,GETDATE(),112),6)) - Convert(int,LEFT(Conve
 
         public async Task<IEnumerable<dynamic>> GetProductStockByBranches()
         {
-            string query = $@"select ITEM.CODE as Sku, SUM(ONHAND) Stock, Round(ISNULL(LG_PRC.PRICE, 0), 2) Price, ITEM.NAME as SkuName
-				from LV_{firmno}_01_STINVTOT TT 
-				INNER JOIN TIGER3DB..L_CAPIDIV DIV ON TT.INVENNO=DIV.NR AND DIV.FIRMNR={firmno}
-				INNER JOIN TIGER3DB..LG_{firmno}_ITEMS ITEM ON ITEM.LOGICALREF=TT.STOCKREF
-				OUTER APPLY
-				(
-					select TOP(1) PRICE from TIGER3DB..LG_{firmno}_PRCLIST
-					where getdate() between BEGDATE and ENDDATE and CLSPECODE5='SN.PERAKEN' and ACTIVE=0
-					AND BRANCH=-1 AND CARDREF=ITEM.LOGICALREF ORDER BY BEGDATE DESC
-				) LG_PRC
-				where (CAST(DIV.NR AS NVARCHAR(MAX)) LIKE '5__' OR CAST(DIV.NR AS NVARCHAR(MAX)) LIKE '6__')
-				GROUP BY ITEM.CODE, LG_PRC.PRICE, ITEM.NAME";
+            string query = $@"SELECT
+    ITEM.CYPHCODE ,
+    ITEM.CODE as Sku,
+    SUM(ONHAND) Stock,
+    Round(ISNULL(LG_PRC.PRICE, 0), 2) Price,
+    ITEM.NAME as SkuName,
+    ITEM.SPECODE AS SpeCode
+FROM
+    LV_{firmno}_01_STINVTOT TT
+INNER JOIN
+    TIGER3DB..L_CAPIDIV DIV ON TT.INVENNO = DIV.NR AND DIV.FIRMNR = {firmno}
+INNER JOIN
+    TIGER3DB..LG_{firmno}_ITEMS ITEM ON ITEM.LOGICALREF = TT.STOCKREF
+OUTER APPLY
+    (
+        SELECT TOP(1) PRICE
+        FROM TIGER3DB..LG_{firmno}_PRCLIST
+        WHERE GETDATE() BETWEEN BEGDATE AND ENDDATE
+        AND CLSPECODE5 = 'SN.PERAKEN'
+        AND ACTIVE = 0
+        AND BRANCH = -1
+        AND CARDREF = ITEM.LOGICALREF
+        ORDER BY BEGDATE DESC
+    ) LG_PRC
+WHERE
+    (CAST(DIV.NR AS NVARCHAR(MAX)) LIKE '5__'
+    OR CAST(DIV.NR AS NVARCHAR(MAX)) LIKE '6__')
+AND CAST(DIV.NR AS NVARCHAR(MAX))!='555'
+GROUP BY
+     ITEM.CYPHCODE , ITEM.CODE, LG_PRC.PRICE, ITEM.NAME, ITEM.SPECODE
+HAVING
+    CASE
+        WHEN ITEM.CYPHCODE IN ('1', '2', '3', '4', '5') THEN 0
+        ELSE 1
+    END = 1";
             var result = await dbConnection.QueryAsync<dynamic>(sql: query);
             return result;
         }

@@ -213,7 +213,7 @@ namespace SuperfonMobileAPI.Controllers
             IEnumerable<ProductStockStateDto> result = products.Select(p => new ProductStockStateDto()
             {
                 sku = p.Sku,
-                hasStock = (p.Stock >= 2 && p.Price >=15),
+                hasStock = (p.SpeCode == "JOYROOM" || p.SpeCode == "EUROACS") ? (p.Price > 4.9) : (p.Price > 14.9),
                 price = p.Price,
                 skuName = p.SkuName
             });

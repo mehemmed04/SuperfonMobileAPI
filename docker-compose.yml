@@ -1,0 +1,10 @@
+﻿version: '3.4'
+services:
+  superfonmobileapi:
+    image: superfonmobileapi
+    restart: always
+    build:
+      context: .
+      dockerfile: SuperfonMobileAPI/Dockerfile
+    ports:
+      - "9002:80"
