@@ -14,6 +14,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SuperfonMobileAPI.Domain.Models;
 
 namespace SuperfonMobileAPI.Controllers
 {
@@ -34,14 +35,18 @@ namespace SuperfonMobileAPI.Controllers
         int userId { get { return Convert.ToInt32(User.FindFirstValue("UserId")); } }
 
         [HttpGet("current/total")]
-        public async Task<ActionResult<double>> GetCurrentUserConnectedSafeboxTotal([FromQuery] DateTime? date)
+        public async Task<ActionResult<SafeAmountResponseModel>> GetCurrentUserConnectedSafeboxTotal(SafeAmountRequestModel date)
         {
             var userDetails = await context.Users.FindAsync(userId);
             var personnelData = await tigerData.GetEFlowPersonnel(userDetails.UserPID);
             var safeboxes = await context.UserSafeboxPermissions.Where(x => x.UserId == userId).ToListAsync();
             if (safeboxes.Count == 0) return NotFound(Constants.UserConnectedSafeboxNotFound);
-            if (date == null) date = DateTime.Today;
-            return await tigerData.GetSafeboxTotal(safeboxes.First().SafeboxCode, date.Value);
+            if (date == null) date.Date = DateTime.Today;
+            var result = await tigerData.GetSafeboxTotal(safeboxes.First().SafeboxCode, date.Date.Value);
+                
+            var response = new SafeAmountResponseModel() { Amount = result };
+
+            return response;
         }
 
 
