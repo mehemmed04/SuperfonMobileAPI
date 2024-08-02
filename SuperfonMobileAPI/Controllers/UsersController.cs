@@ -416,7 +416,7 @@ namespace SuperfonMobileAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginDTO dto,[FromQuery] string returnUrl)
+        public async Task<IActionResult> Login(LoginDTO dto, [FromQuery] string returnUrl)
         {
 
             if (string.IsNullOrEmpty(returnUrl))
