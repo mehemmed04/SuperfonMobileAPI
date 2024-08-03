@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SuperfonMobileAPI.Models.Entities;
 using SuperfonMobileAPI.Services;
 using SuperfonWorks.Data;
@@ -16,16 +17,25 @@ namespace SuperfonMobileAPI.Controllers
     [ApiController]
     public class SalesController : ControllerBase
     {
-        TigerDataService tigerData = null;
-        public SalesController(TigerDataService _tigerData, AppDataService _appDataService)
+        SalesBackgroundService _salesBackgroundService = null;
+        private readonly IMemoryCache _memoryCache;
+        private const string CacheKey = "SalesData";
+
+        public SalesController(SalesBackgroundService salesBackgroundService, IMemoryCache memoryCache)
         {
-            tigerData = _tigerData;
+            _salesBackgroundService = salesBackgroundService;
+            _memoryCache = memoryCache;
         }
 
         [HttpGet("GetSales")]
-        public async Task<IEnumerable<TigerSales>> GetAllSales()
+        public async Task<IActionResult> GetAllSales()
         {
-            return await tigerData.GetSales();
+            if (_memoryCache.TryGetValue(CacheKey, out IEnumerable<TigerSales> salesData))
+            {
+                return Ok(salesData);
+            }
+
+            return BadRequest("There is not any sale");
         }
     }
 }

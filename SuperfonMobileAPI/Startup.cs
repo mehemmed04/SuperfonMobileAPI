@@ -128,6 +128,11 @@ namespace SuperfonMobileAPI
             services.AddScoped<SecurityService>();
             services.AddScoped<TigerDataService>();
             services.AddScoped<AppDataService>();
+
+            services.AddMemoryCache();
+            services.AddSingleton<SalesBackgroundService>();
+            services.AddHostedService(provider => provider.GetRequiredService<SalesBackgroundService>());
+            services.AddLogging();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
