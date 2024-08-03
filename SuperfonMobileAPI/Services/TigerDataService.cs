@@ -53,8 +53,6 @@ namespace SuperfonMobileAPI.Services
             return await dbConnection.QueryAsync<TigerBankAccount>($"select LOGICALREF as AccountId, CODE as AccountCode, DEFINITION_ as AccountName from LG_{firmno}_BANKACC ");
         }
 
-
-
         public async Task<double> GetSafeboxTotal(string safeboxCode, DateTime date)
         {
             return await dbConnection.QueryFirstOrDefaultAsync<double>($@"
