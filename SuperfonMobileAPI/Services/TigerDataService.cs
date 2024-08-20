@@ -959,17 +959,7 @@ namespace SuperfonMobileAPI.Services
                 {
                     await dbConnection.ExecuteAsync($@"
                     INSERT INTO [ANDROID].[dbo].[AU_001_01_EZAMIYYEMASRAF]
-                       ([REFERANSID]
-                       ,[TARIH]
-                       ,[EZAMIYYE_NO]
-                       ,[TALEP_EDEN_PERS_KOD]
-                       ,[TALEP_EDEN_PERS_ADI]
-                       ,[EZAMIYYE_ACIKLAMASI]
-                       ,[ADET]
-                       ,[BIRIM_FIYAT]
-                       ,[TUTAR]
-                       ,[EFLOW_DURUM]
-                       ,[AVANS_KASA_KODU]
+                 ANS_KASA_KODU]
                        ,[IMAGE_FILE])
                  VALUES
                        (@REFERANSID,
@@ -981,7 +971,17 @@ namespace SuperfonMobileAPI.Services
                         @ADET,
                         @BIRIM_FIYAT,
                         @TUTAR,
-                        0,
+                        0,      ([REFERANSID]
+                       ,[TARIH]
+                       ,[EZAMIYYE_NO]
+                       ,[TALEP_EDEN_PERS_KOD]
+                       ,[TALEP_EDEN_PERS_ADI]
+                       ,[EZAMIYYE_ACIKLAMASI]
+                       ,[ADET]
+                       ,[BIRIM_FIYAT]
+                       ,[TUTAR]
+                       ,[EFLOW_DURUM]
+                       ,[AV
                         @AVANS_KASA_KODU,
 			            @IMAGE_FILE)
                     ", new

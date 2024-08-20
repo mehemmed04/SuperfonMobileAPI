@@ -210,10 +210,18 @@ namespace SuperfonMobileAPI.Controllers
         public async Task<IEnumerable<ProductStockStateDto>> GetStockState()
         {
             var products = await tigerData.GetProductStockByBranches();
+            // foreach (var p in products)
+            // {
+            //     if (p.Sku == "ASATSM115205")
+            //     {
+            //         var x = p.Sku;
+            //     }
+            // }
+
             IEnumerable<ProductStockStateDto> result = products.Select(p => new ProductStockStateDto()
             {
                 sku = p.Sku,
-                hasStock = (p.SpeCode == "JOYROOM" || p.SpeCode == "EUROACS") ? (p.Price > 4.9) : (p.Price > 14.9),
+                hasStock = ((p.SpeCode == "JOYROOM" || p.SpeCode == "EUROACS") ? (p.Price > 4.9) : (p.Price > 14.9)) && p.Stock!=0,
                 price = p.Price,
                 skuName = p.SkuName
             });
