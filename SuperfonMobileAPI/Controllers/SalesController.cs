@@ -8,6 +8,7 @@ using SuperfonMobileAPI.Services;
 using SuperfonWorks.Data;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SuperfonMobileAPI.Controllers
@@ -28,11 +29,11 @@ namespace SuperfonMobileAPI.Controllers
         }
 
         [HttpGet("GetSales")]
-        public async Task<IActionResult> GetAllSales()
+        public async Task<IActionResult> GetAllSales(int year, int month)
         {
             if (_memoryCache.TryGetValue(CacheKey, out IEnumerable<TigerSales> salesData))
             {
-                return Ok(salesData);
+                return Ok(salesData.Where(s=>s.NumberOfMonth==month));
             }
 
             return BadRequest("There is not any sale");
