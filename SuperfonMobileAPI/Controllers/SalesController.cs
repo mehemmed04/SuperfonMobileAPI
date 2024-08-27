@@ -29,11 +29,11 @@ namespace SuperfonMobileAPI.Controllers
         }
 
         [HttpGet("GetSales")]
-        public async Task<IActionResult> GetAllSales(int year, int month)
+        public async Task<IActionResult> GetAllSales()
         {
             if (_memoryCache.TryGetValue(CacheKey, out IEnumerable<TigerSales> salesData))
             {
-                return Ok(salesData.Where(s=>s.NumberOfMonth==month));
+                return Ok(salesData);
             }
 
             return BadRequest("There is not any sale");
