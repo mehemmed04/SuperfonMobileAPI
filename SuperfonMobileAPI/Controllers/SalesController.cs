@@ -31,50 +31,37 @@ namespace SuperfonMobileAPI.Controllers
             if (_memoryCache.TryGetValue(CacheKey, out IEnumerable<TigerSales> salesData))
             {
                 salesData = salesData.Where(s => s.NumberOfMonth == month).ToList();
-                //return Ok(salesData);
-                var response = new List<SaleInfo>();
-                foreach (var sale in salesData)
-                {
-                    bool isExists = false;
-                    foreach (var r in response)
-                    {
-                        if (sale.NR == r.NR)
-                        {
-                            r.Details.Add(new SaleDetail()
-                            {
-                                Goal = sale.Goal,
-                                PlanType = sale.PlanType,
-                                SaleAmount = sale.SaleAmount,
-                                Result = sale.Result
-                            });
-                            isExists = true;
-                        }
-                        else isExists = false;
-                    }
+                // return Ok(salesData);
+                var nrs = salesData.Select(s => s.NR).Distinct();
 
-                    if (!isExists)
-                        response.Add(new SaleInfo()
+                var result = new List<SaleInfo>();
+                foreach (var nr in nrs)
+                {
+                    var responses = salesData.Where(s => s.NR == nr).ToList();
+                    var saleInfo = new SaleInfo()
+                    {
+                        NR = nr,
+                        SaleLocation = responses.ElementAt(0).SaleLocation,
+                        Details = new List<SaleDetail>()
+                    };
+                    foreach (var response in responses)
+                    {
+                        saleInfo.Details.Add(new SaleDetail()
                         {
-                            NR = sale.NR,
-                            SaleLocation = sale.SaleLocation,
-                            Details = new List<SaleDetail>()
-                            {
-                                new SaleDetail()
-                                {
-                                    Goal = sale.Goal,
-                                    PlanType = sale.PlanType,
-                                    SaleAmount = sale.SaleAmount,
-                                    Result = sale.Result
-                                }
-                            }
-                    });
+                            Goal = response.Goal,
+                            PlanType = response.PlanType,
+                            SaleAmount = response.SaleAmount,
+                            Result = response.Result
+                        });
+                    }
+                    result.Add(saleInfo);
                 }
-                
-                return Ok(response);
+                return Ok(result);
             }
 
             return BadRequest("There is not any sale");
         }
+
         public class SaleDetail
         {
             public string PlanType { get; set; }
@@ -90,6 +77,5 @@ namespace SuperfonMobileAPI.Controllers
 
             public List<SaleDetail> Details { get; set; } = new List<SaleDetail>();
         }
-
     }
 }
