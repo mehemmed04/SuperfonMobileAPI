@@ -203,6 +203,32 @@ namespace SuperfonMobileAPI.Controllers
             return Ok(result);
         }
 
+        [HttpGet("advance-declaration")]
+        public async Task<IActionResult> GetExpenseInformation(int declerationId)
+        {
+            var expense = await sfContext.ExpenseDeclarationViews
+                                 .FirstOrDefaultAsync(x => x.ExpenseDeclarationId.Equals(declerationId));
+
+            if (expense == null)
+                return BadRequest("There is no expense");
+
+            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<ExpenseDeclarationResultDTO>(Newtonsoft.Json.JsonConvert.SerializeObject(expense));
+
+            var det = await sfContext.ExpenseDeclarationDetails
+                             .Where(x => x.ExpenseDeclarationId == result.ExpenseDeclarationId)
+                             .FirstOrDefaultAsync();
+
+            if (det == null)
+                return BadRequest("There is no information");
+
+            var declarationDetailId = det.ExpenseDeclarationDetailId;
+
+            var expenseInformation = await tigerData.GetExpenseDeclarationInformation(declarationDetailId);
+
+            return Ok(expenseInformation);
+        }
+
+
         [HttpGet("request/qr/{requestId}")]
         public async Task<IActionResult> GetRequestQR(int requestId, string deviceId)
         {
