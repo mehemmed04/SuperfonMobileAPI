@@ -15,6 +15,7 @@ using SuperfonMobileAPI.Models.EFlow;
 using System.Collections;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
+using SuperfonMobileAPI.Domain.Models;
 
 namespace SuperfonMobileAPI.Services
 {
@@ -616,6 +617,14 @@ namespace SuperfonMobileAPI.Services
 
                 return 0;
             }
+        }
+
+        public async Task<ExpenseDeclarationInformationViewModel> GetExpenseDeclarationInformation(int declarationDetailId)
+        {
+            var result =  await dbConnection.QueryFirstOrDefaultAsync<ExpenseDeclarationInformationViewModel>(@"select MASRAF_ACIKLAMASI as ExpenseDescription, MASRAF_TUTARI as ExpenseAmount from [ANDROID].[dbo].[AU_001_01_ISAVANSHESAPDETAY]
+            where REFERANSID = @id", new { id = declarationDetailId });
+
+            return result;
         }
 
 
