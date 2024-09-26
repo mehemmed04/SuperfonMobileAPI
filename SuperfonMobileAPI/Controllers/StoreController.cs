@@ -116,6 +116,7 @@ namespace SuperfonMobileAPI.Controllers
         {
             try
             {
+                return new dynamic[] { };
                 var list = await tigerData.GetSalesmanCategorySalesByBranch(year, month, branchNumber);
                 var grouppedBySlsman = list.ToLookup(x => (x.SalesmanCode, x.SalesmanName));
                 return grouppedBySlsman.Select(x => new { x.Key.SalesmanCode, x.Key.SalesmanName, Total = x.Select(f => f.Total).Cast<double>().Sum(), Details = x.Select(t => new { CategoryName = TigerDataService.GetCategoryName(t.KATEGORI), t.Quantity, t.Total }) });
