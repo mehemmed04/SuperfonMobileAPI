@@ -20,6 +20,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Runtime.CompilerServices;
+using Dapper;
+using SuperfonMobileAPI.Domain.Models;
 namespace SuperfonMobileAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -53,8 +56,8 @@ namespace SuperfonMobileAPI.Controllers
         public async Task<IActionResult> InsertAdvanceRequest(ExpenseAdvanceRequestDTO dto)
         {
             var user = await sfContext.Users.FindAsync(userId);
-           // var safeboxes = await sfContext.UserSafeboxPermissions.ByUserId(userId).ToListAsync();
-           // if (safeboxes.Count == 0) return NotFound(Constants.UserConnectedSafeboxNotFound);
+            // var safeboxes = await sfContext.UserSafeboxPermissions.ByUserId(userId).ToListAsync();
+            // if (safeboxes.Count == 0) return NotFound(Constants.UserConnectedSafeboxNotFound);
 
             try
             {
@@ -72,7 +75,7 @@ namespace SuperfonMobileAPI.Controllers
                 {
                     await tigerData.InsertExpenseAdvanceRequest(expenseAdvanceRequest, user);
                 }
-                else 
+                else
                 {
                     await tigerData.InsertExpenseForceRequest(expenseAdvanceRequest, user);
                 }
@@ -112,9 +115,9 @@ namespace SuperfonMobileAPI.Controllers
 
 
         [HttpGet("advance-request/list")]
-        public async Task<ActionResult<IEnumerable<ExpenseAdvanceRequestView>>> GetAdvanceRequests([FromQuery] bool? isDeclared,[FromQuery] byte requestType)
+        public async Task<ActionResult<IEnumerable<ExpenseAdvanceRequestView>>> GetAdvanceRequests([FromQuery] bool? isDeclared, [FromQuery] byte requestType)
         {
-            var query = sfContext.ExpenseAdvanceRequestViews.Where(x => x.UserId == userId && x.RequestDate > DateTime.Today.AddYears(-1) && x.RequestType == requestType );
+            var query = sfContext.ExpenseAdvanceRequestViews.Where(x => x.UserId == userId && x.RequestDate > DateTime.Today.AddYears(-1) && x.RequestType == requestType);
             if (isDeclared.HasValue)
                 query = query.Where(x => x.IsDeclared == isDeclared.Value);
             var list = await query.ToListAsync();
@@ -128,10 +131,10 @@ namespace SuperfonMobileAPI.Controllers
             try
             {
                 var user = await sfContext.Users.FindAsync(userId);
-                
-              //  var 
-            //    var safeboxes = await sfContext.UserSafeboxPermissions.Where(x => x.UserId == userId).ToListAsync();
-             //   if (safeboxes.Count == 0) return NotFound(Constants.UserConnectedSafeboxNotFound);
+
+                //  var 
+                //    var safeboxes = await sfContext.UserSafeboxPermissions.Where(x => x.UserId == userId).ToListAsync();
+                //   if (safeboxes.Count == 0) return NotFound(Constants.UserConnectedSafeboxNotFound);
 
                 ExpenseDeclaration expenseDeclaration = new ExpenseDeclaration
                 {
@@ -151,7 +154,7 @@ namespace SuperfonMobileAPI.Controllers
                 {
                     return BadRequest("Yalnız hesabata alınmamış avanslar seçilə bilər");
                 }
-                if (expenseAdvanceRequests.Select(x=>x.RequestType).Distinct().Count() != 1)
+                if (expenseAdvanceRequests.Select(x => x.RequestType).Distinct().Count() != 1)
                 {
                     return BadRequest("Yalnız eyni avanslar növləri seçilə bilər");
                 }
@@ -215,17 +218,23 @@ namespace SuperfonMobileAPI.Controllers
             var result = Newtonsoft.Json.JsonConvert.DeserializeObject<ExpenseDeclarationResultDTO>(Newtonsoft.Json.JsonConvert.SerializeObject(expense));
 
             var det = await sfContext.ExpenseDeclarationDetails
-                             .Where(x => x.ExpenseDeclarationId == result.ExpenseDeclarationId)
-                             .FirstOrDefaultAsync();
+                             .Where(x => x.ExpenseDeclarationId == result.ExpenseDeclarationId).ToListAsync();
 
             if (det == null)
                 return BadRequest("There is no information");
 
-            var declarationDetailId = det.ExpenseDeclarationDetailId;
 
-            var expenseInformation = await tigerData.GetExpenseDeclarationInformation(declarationDetailId);
+            var declarationDetailIds = det.Select(x => x.ExpenseDeclarationDetailId);
 
-            return Ok(expenseInformation);
+            List<ExpenseDeclarationInformationViewModel> model = new List<ExpenseDeclarationInformationViewModel>();
+
+            foreach (var declarationDetailId in declarationDetailIds)
+            {
+                var response = await tigerData.GetExpenseDeclarationInformation(declarationDetailId);
+                model.Add(response);
+            }
+
+            return Ok(model);
         }
 
 
@@ -240,7 +249,7 @@ namespace SuperfonMobileAPI.Controllers
             var data = await sfContext.ExpenseAdvanceRequests.FindAsync(requestId);
             var user = await sfContext.Users.FindAsync(data.UserId);
             var userEFlowData = await tigerData.GetEFlowPersonnel(user.UserPID);
-           // var cardData = await sfContext.UserCardCodePermissions.Where(x => x.UserId == user.UserId && x.CardPermissionTypeId == 1).FirstOrDefaultAsync();
+            // var cardData = await sfContext.UserCardCodePermissions.Where(x => x.UserId == user.UserId && x.CardPermissionTypeId == 1).FirstOrDefaultAsync();
             var cardTigerData = await tigerData.GetCardByCode(userEFlowData.ISAVANS_CARI_KODU);
             string docno = data.RequestDate.ToString("yyMMdd") + moduleSign + data.ExpenseAdvanceRequestId.ToString();
             string txtQRCode = $"{cardTigerData?.CardId} - {cardTigerData?.CardCode} - {salesmanCode} - {data.RequestAmount} - {opType} - {docno} - {data.RequestDescription} \n";
@@ -258,8 +267,41 @@ namespace SuperfonMobileAPI.Controllers
                 result["textData"] = txtQRCode;
                 return Ok(result);
             }
+        }
+
+        [HttpGet("test-endpoint")]
+        public async Task<IActionResult> GetExpenseDetails(int expenseAdvanceRequestId)
+        {
+            var expenseAdvanceRequests = await sfContext.ExpenseAdvanceRequests.Where(x => x.ExpenseAdvanceRequestId == expenseAdvanceRequestId).ToListAsync();
+
+            var declarationId = expenseAdvanceRequests.FirstOrDefault().ExpenseDeclarationId;
+
+            var expense = await sfContext.ExpenseDeclarationViews
+                                 .FirstOrDefaultAsync(x => x.ExpenseDeclarationId.Equals(declarationId));
+
+            if (expense == null)
+                return BadRequest("There is no expense");
+
+            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<ExpenseDeclarationResultDTO>(Newtonsoft.Json.JsonConvert.SerializeObject(expense));
+
+            var det = await sfContext.ExpenseDeclarationDetails
+                             .Where(x => x.ExpenseDeclarationId == result.ExpenseDeclarationId).ToListAsync();
+
+            if (det == null)
+                return BadRequest("There is no information");
 
 
+            var declarationDetailIds = det.Select(x => x.ExpenseDeclarationDetailId);
+
+            List<ExpenseDeclarationInformationViewModel> model = new List<ExpenseDeclarationInformationViewModel>();
+
+            foreach (var declarationDetailId in declarationDetailIds)
+            {
+                var response = await tigerData.GetExpenseDeclarationInformation(declarationDetailId);
+                model.Add(response);
+            }
+
+            return Ok(model);
         }
     }
 }

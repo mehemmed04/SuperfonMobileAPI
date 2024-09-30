@@ -16,6 +16,8 @@ using System.Collections;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using SuperfonMobileAPI.Domain.Models;
+using System.Xml.Linq;
+using SuperfonMobileAPI.Domain.Validation;
 
 namespace SuperfonMobileAPI.Services
 {
@@ -1119,6 +1121,51 @@ namespace SuperfonMobileAPI.Services
                 ");
         }
 
+        public async Task<BusinessTripDeclarationDetailNewDTO> GetBusinessTripDeclarationDetails(string userPID, BusinessTripDetailsRequest request)
+        {
+            var query = @"
+SELECT 
+    TLP.TUTAR RequestTotal,
+    TLP.TALEP_ACIKLAMASI RequestDescription
+FROM [ANDROID].[dbo].[AU_001_01_EZAMIYYEMASRAF] MSR
+LEFT JOIN [ANDROID].[dbo].[AU_FLOW_STATUS] STS ON MSR.EFLOW_DURUM = STS.STATUS_ID
+LEFT JOIN [ANDROID].[dbo].[AU_001_01_EZAMIYYETALEP] TLP ON MSR.REFERANSID = TLP.REFERANSID
+WHERE MSR.TARIH > GETDATE() - 32
+AND MSR.TALEP_EDEN_PERS_KOD = @userPID
+AND MSR.REFERANSID = @BusinessTripId
+AND MSR.TARIH = @Date
+AND MSR.EZAMIYYE_NO = @BusinessTripNumber
+AND MSR.EZAMIYYE_ACIKLAMASI = @Note
+AND MSR.AVANS_KASA_KODU = @CashboxCode
+AND MSR.EFLOW_DURUM = @StatusId
+AND MSR.ADET = @Quantity
+AND MSR.BIRIM_FIYAT = @Price
+AND MSR.TUTAR = @Total
+AND STS.STATUS_NAME = N'Təsdiqləndi'
+AND TLP.TARIH = @RequestDate
+AND TLP.TUTAR = @RequestTotal
+AND TLP.TALEP_ACIKLAMASI = @RequestDescription";
+
+            var result = await dbConnection.QueryFirstOrDefaultAsync<BusinessTripDeclarationDetailNewDTO>(query, new
+            {
+                userPID = userPID,
+                BusinessTripId = request.BusinessTripId,
+                Date = request.Date,
+                BusinessTripNumber = request.BusinessTripNumber,
+                Note = request.Note,
+                CashboxCode = request.CashboxCode,
+                StatusId = request.StatusId,
+                Quantity = request.Quantity,
+                Price = request.Price,
+                Total = request.Total,
+                RequestDate = request.RequestDate,
+                RequestTotal = request.RequestTotal,
+                RequestDescription = request.RequestDescription
+            });
+
+            return result;
+        }
+      
         public async Task<dynamic> GetEZAMIYYETALEP(int REFERANSID)
         {
             return await dbConnection.QueryFirstOrDefaultAsync($@"select * from [ANDROID].[dbo].AU_001_01_EZAMIYYETALEP where REFERANSID = {REFERANSID}");
