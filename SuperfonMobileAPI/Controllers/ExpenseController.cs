@@ -269,39 +269,21 @@ namespace SuperfonMobileAPI.Controllers
             }
         }
 
-        [HttpGet("test-endpoint")]
+        [HttpGet("advance-declaration/details")]
         public async Task<IActionResult> GetExpenseDetails(int expenseAdvanceRequestId)
         {
-            var expenseAdvanceRequests = await sfContext.ExpenseAdvanceRequests.Where(x => x.ExpenseAdvanceRequestId == expenseAdvanceRequestId).ToListAsync();
+            var expenseAdvanceRequests = await sfContext.ExpenseAdvanceRequests.FirstOrDefaultAsync(x => x.ExpenseAdvanceRequestId == expenseAdvanceRequestId);
 
-            var declarationId = expenseAdvanceRequests.FirstOrDefault().ExpenseDeclarationId;
+            if (expenseAdvanceRequests == null)
+                return BadRequest("Not found");
 
-            var expense = await sfContext.ExpenseDeclarationViews
-                                 .FirstOrDefaultAsync(x => x.ExpenseDeclarationId.Equals(declarationId));
-
-            if (expense == null)
-                return BadRequest("There is no expense");
-
-            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<ExpenseDeclarationResultDTO>(Newtonsoft.Json.JsonConvert.SerializeObject(expense));
-
-            var det = await sfContext.ExpenseDeclarationDetails
-                             .Where(x => x.ExpenseDeclarationId == result.ExpenseDeclarationId).ToListAsync();
-
-            if (det == null)
-                return BadRequest("There is no information");
-
-
-            var declarationDetailIds = det.Select(x => x.ExpenseDeclarationDetailId);
-
-            List<ExpenseDeclarationInformationViewModel> model = new List<ExpenseDeclarationInformationViewModel>();
-
-            foreach (var declarationDetailId in declarationDetailIds)
+            var result = new
             {
-                var response = await tigerData.GetExpenseDeclarationInformation(declarationDetailId);
-                model.Add(response);
-            }
+                RequestAmount = expenseAdvanceRequests.RequestAmount,
+                Description = expenseAdvanceRequests.RequestDescription
+            };
 
-            return Ok(model);
+            return Ok(result);
         }
     }
 }
