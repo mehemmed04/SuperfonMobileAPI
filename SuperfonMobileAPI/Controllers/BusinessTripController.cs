@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using SuperfonMobileAPI.Domain.Models;
+using SuperfonMobileAPI.Domain.Validation;
 using SuperfonMobileAPI.Models.Dtos;
 using SuperfonMobileAPI.Models.Entities;
 using SuperfonMobileAPI.Services;
@@ -90,6 +92,17 @@ namespace SuperfonMobileAPI.Controllers
             list.ForEach(x => x.Note = ExtensionMethods.ReverseLineBreaks(x.Note));
             return Ok(list);
         }
-    }
 
+        [HttpPost("declaration/detail")]
+        public async Task<IActionResult> GetExpenseDeclarationDetails([FromBody] BusinessTripDetailsRequest request)
+        {
+            var user = await sfContext.Users.FindAsync(userId);
+            var result = (await tigerData.GetBusinessTripDeclarationDetails(user.UserPID, request));
+
+            if (result != null)
+                return Ok(result);
+
+            return BadRequest("You entered wrong information");
+        }
+    }
 }
