@@ -218,23 +218,17 @@ namespace SuperfonMobileAPI.Controllers
             var result = Newtonsoft.Json.JsonConvert.DeserializeObject<ExpenseDeclarationResultDTO>(Newtonsoft.Json.JsonConvert.SerializeObject(expense));
 
             var det = await sfContext.ExpenseDeclarationDetails
-                             .Where(x => x.ExpenseDeclarationId == result.ExpenseDeclarationId).ToListAsync();
+                             .Where(x => x.ExpenseDeclarationId == result.ExpenseDeclarationId)
+                             .FirstOrDefaultAsync();
 
             if (det == null)
                 return BadRequest("There is no information");
 
+            var declarationDetailId = det.ExpenseDeclarationDetailId;
 
-            var declarationDetailIds = det.Select(x => x.ExpenseDeclarationDetailId);
+            var expenseInformation = await tigerData.GetExpenseDeclarationInformation(declarationDetailId);
 
-            List<ExpenseDeclarationInformationViewModel> model = new List<ExpenseDeclarationInformationViewModel>();
-
-            foreach (var declarationDetailId in declarationDetailIds)
-            {
-                var response = await tigerData.GetExpenseDeclarationInformation(declarationDetailId);
-                model.Add(response);
-            }
-
-            return Ok(model);
+            return Ok(expenseInformation);
         }
 
 
