@@ -93,6 +93,15 @@ namespace SuperfonMobileAPI.Controllers
             return Ok(list);
         }
 
+        [HttpGet("declaration/businessTripNumbersList")]
+        public async Task<ActionResult<IEnumerable<string>>> GetExpenseBusinessTripNumbers()
+        {
+            var user = await sfContext.Users.FindAsync(userId);
+            var list = (await tigerData.GetBusinessTripNumbers(user.UserPID)).ToList();
+            return Ok(list);
+        }
+
+
         [HttpPost("declaration/detail")]
         public async Task<IActionResult> GetExpenseDeclarationDetails([FromBody] BusinessTripDetailsRequest request)
         {

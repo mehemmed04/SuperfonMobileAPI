@@ -1121,6 +1121,15 @@ namespace SuperfonMobileAPI.Services
                 ");
         }
 
+        public async Task<IEnumerable<string>> GetBusinessTripNumbers(string userPID)
+        {
+            return await dbConnection.QueryAsync<string>($@"
+              SELECT [EZAMIYYE_NO] BusinessTripNumber
+FROM [ANDROID].[dbo].[AU_001_01_EZAMIYYEMASRAF]
+where TARIH > GETDATE()-32 and [TALEP_EDEN_PERS_KOD] = '{userPID}'
+                ");
+        }
+
         public async Task<BusinessTripDeclarationDetailNewDTO> GetBusinessTripDeclarationDetails(string userPID, BusinessTripDetailsRequest request)
         {
             var query = @"
