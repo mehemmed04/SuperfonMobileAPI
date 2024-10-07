@@ -18,6 +18,7 @@ using System.Text;
 using SuperfonMobileAPI.Domain.Models;
 using System.Xml.Linq;
 using SuperfonMobileAPI.Domain.Validation;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SuperfonMobileAPI.Services
 {
@@ -1775,6 +1776,53 @@ HAVING
             if (dc.ContainsKey(id))
                 return dc[id];
             return $"Kateqoriya id - {id}";
+        }
+
+        public async Task<IEnumerable<dynamic>> Get_VCReport1530Query(int month, int branchId, bool interval, [FromQuery] string orderby, string? customerName)
+        {
+            int year = DateTime.Now.Year;
+            int day = 15;
+            if (interval) day = DateTime.DaysInMonth(year, month);
+
+            var data = await dbConnection.QueryAsync<dynamic>(@$" 
+            SELECT T.CustomerCode, T.CustomerName, T.InitalVC, RemainingVC - InitalVC + TotalPaid PeriodVC, T.TotalPaid, T.RemainingVC,
+            ROUND(CASE WHEN RemainingVC + TotalPaid = 0 THEN 0 ELSE TotalPaid / (RemainingVC + TotalPaid) END * 100,1) ExecutionPercentage
+            FROM 
+            (
+            select 
+            div.NR BranchId,
+            div.name BranchName,
+            cl.code CustomerCode,
+            cl.definition_ CustomerName,
+            ISNULL(ROUND(case when [vc_init].VC_BORC>0 then [vc_init].VC_BORC  else 0 end,2),0) InitalVC,
+            ISNULL(ROUND(odeme.odeme,2),0) TotalPaid, 
+            ISNULL(ROUND(case when [vc_last].VC_BORC>0 then [vc_last].VC_BORC  else 0 end,2),0) RemainingVC
+            from 
+            (select clientref, BRANCH, sum(AMOUNT) a from tiger3db..LG_{firmno}_01_CLFLINE
+            group by clientref, BRANCH)
+            clf  
+            inner join tiger3db..lg_{firmno}_clcard cl on (cl.logicalref=clf.CLIENTREF) and cl.CODE LIKE '211.%' and cl.CODE NOT LIKE '211.01.100%'
+            left join 
+            (
+            select nr, clientref,    sum(MEBLEG*-1) odeme from tiger3db..[E_VIEW_MUSTERI_HEREKETLERI_2{firmno}] where TARIX between '{year}-{month}-01' and '{year}-{month}-{day}'  and
+              FIS_TURU in ('5 Pul (Medax)', '6 Pul (Mex)', 'Gelen Havaleler') 
+            group by nr,clientref, month(TARIX)
+            ) odeme on (odeme.clientref=clf.CLIENTREF and clf.BRANCH=odeme.nr)
+            left join 
+            (SELECT CARDREF, [ISYERI], SUM(TOTAL*CASE WHEN SIGN=0 THEN 1 ELSE -1 END) VC_BORC   FROM  tiger3db..AS_{firmno}_01_BT 
+            WHERE DATE_<='{year}-{month}-{day}'
+            group by CARDREF,[ISYERI]) [vc_last] on ([vc_last].CARDREF = clf.CLIENTREF and [vc_last].ISYERI=clf.BRANCH)
+            left join 
+            (SELECT CARDREF, [ISYERI], SUM(TOTAL*CASE WHEN SIGN=0 THEN 1 ELSE -1 END) VC_BORC   FROM  tiger3db..AS_{firmno}_01_BT 
+            WHERE DATE_< '{year}-{month}-01'
+            group by CARDREF,[ISYERI]) [vc_init] on ([vc_init].CARDREF = clf.CLIENTREF and [vc_init].ISYERI=clf.BRANCH)
+            inner join 
+            (select nr, name from tiger3db..L_CAPIDIV where firmnr={firmno}) div on (div.NR=clf.BRANCH)
+            ) T
+            WHERE T.BranchId = {branchId} and CustomerName like '{customerName}%'
+            ", new { ay = month });
+
+            return data;
         }
     }
 }
