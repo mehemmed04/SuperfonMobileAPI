@@ -64,11 +64,18 @@ namespace SuperfonMobileAPI.Controllers
         }
 
         [HttpGet("cardDatas/list/filtration")]
-        public async Task<IActionResult> GetCardDatas(string filteringItem)
+        public async Task<IActionResult> GetCardDatas(string? filteringItem)
         {
+            IEnumerable<TigerCard> datas = new List<TigerCard>();
+
+            if (filteringItem == null)
+            {
+                return BadRequest(datas);
+            }
+
             var user = await sfContext.Users.Include(x => x.UserCardCodePermissions).FirstOrDefaultAsync(u => u.UserId == userId);
 
-            var datas = await tigerData.GetCardsFiltration(filteringItem);
+            datas = await tigerData.GetCardsFiltration(filteringItem);
 
             return Ok(datas);
         }
