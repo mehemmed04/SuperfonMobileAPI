@@ -93,6 +93,12 @@ namespace SuperfonMobileAPI.Services
             return await dbConnection.QueryFirstOrDefaultAsync<TigerCard>($"select LOGICALREF CardId,CODE as CardCode, DEFINITION_ as CardName from LG_{firmno}_CLCARD where CODE=@code", new { code });
         }
 
+        public async Task<IEnumerable<TigerCard>> GetCardsFiltration(string item)
+        {
+            return await dbConnection.QueryAsync<TigerCard>(@$"select LOGICALREF CardId,CODE as CardCode, DEFINITION_ as CardName from LG_{firmno}_CLCARD 
+                                                                where DEFINITION_ like '{item}%'");
+        }
+
         public async Task<TigerBankAccount> GetBankAccountByCode(string code)
         {
             return await dbConnection.QueryFirstOrDefaultAsync<TigerBankAccount>($"select LOGICALREF as AccountId, CODE as AccountCode, DEFINITION_ as AccountName from LG_{firmno}_BANKACC WHERE CODE = @code ", new { code });
