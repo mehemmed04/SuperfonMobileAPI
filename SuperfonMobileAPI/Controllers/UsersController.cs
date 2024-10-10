@@ -36,12 +36,16 @@ namespace SuperfonMobileAPI.Controllers
             customJWTValidator = _customJWTValidator;
         }
         [Authorize(Roles = "R-501")]
-        public async Task<IActionResult> Index(bool isActive = true)
+        public async Task<IActionResult> Index(bool isActive = true,int groupId = 0)
         {
             ViewData["isActiveChecked"] = isActive;
-            var list =await sfContext.Users.Where(x=>x.IsActive == isActive).ToListAsync();
+            ViewData["selectedGroupId"] = groupId;
+            List<User> list = groupId == 0
+                ? await sfContext.Users.Where(x => (x.IsActive == isActive)).ToListAsync()
+                : await sfContext.Users.Where(x => (x.IsActive == isActive && x.UserGroupId == groupId)).ToListAsync();
             var data = JsonConvert.DeserializeObject<List<UserListRowDTO>>(JsonConvert.SerializeObject(list));
             var groups = await sfContext.UserGroups.ToListAsync();
+            ViewData["groups"] = groups;
             data.ForEach(x=>x.GroupName = groups.FirstOrDefault(t=>t.UserGroupId == x.UserGroupId)?.UserGroupName);
             return View("index",data);
         }
