@@ -63,6 +63,15 @@ namespace SuperfonMobileAPI.Controllers
             return Ok(data);
         }
 
+        [HttpGet("cardDatas/list/filtration")]
+        public async Task<IActionResult> GetCardDatas(string filteringItem)
+        {
+            var user = await sfContext.Users.Include(x => x.UserCardCodePermissions).FirstOrDefaultAsync(u => u.UserId == userId);
+
+            var datas = await tigerData.GetCardsFiltration(filteringItem);
+
+            return Ok(datas);
+        }
 
         [HttpGet("payback/qr/{id}")]
         public async Task<IActionResult> GetPaybackQR(int id)
