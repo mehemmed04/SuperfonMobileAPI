@@ -70,7 +70,7 @@ namespace SuperfonMobileAPI.Controllers
 
             if (filteringItem == null)
             {
-                return BadRequest(datas);
+                return Ok(datas);
             }
 
             var user = await sfContext.Users.Include(x => x.UserCardCodePermissions).FirstOrDefaultAsync(u => u.UserId == userId);
