@@ -2,6 +2,11 @@
 WORKDIR /app
 EXPOSE 80
 
+# Install libgdiplus for System.Drawing.Common support on Linux
+RUN apt-get update && \
+    apt-get install -y libgdiplus libc6-dev && \
+    rm -rf /var/lib/apt/lists/*
+    
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
