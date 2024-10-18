@@ -228,9 +228,13 @@ namespace SuperfonMobileAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteMenuPermission(int userId, int menuPermissionId)
         {
-            var mn = await sfContext.UserMenuPermissions.SingleOrDefaultAsync(x => x.UserId == userId && x.MenuPermissionId == menuPermissionId);
+            var mn = await sfContext.UserMenuPermissions
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.MenuPermissionId == menuPermissionId);
+
+            if (mn == null) return await MenuPermission(userId);
             sfContext.UserMenuPermissions.Remove(mn);
             await sfContext.SaveChangesAsync();
+
             return await MenuPermission(userId);
         }
 
@@ -420,7 +424,7 @@ namespace SuperfonMobileAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginDTO dto, [FromQuery] string returnUrl)
+        public async Task<IActionResult> Login(LoginDTO dto,[FromQuery] string returnUrl)
         {
 
             if (string.IsNullOrEmpty(returnUrl))

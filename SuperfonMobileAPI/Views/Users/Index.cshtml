@@ -16,7 +16,7 @@ $(document).ready(function(){
 
 <div class="card" style="width: 100%;">
     <div class="card-title">
-        <h5 class="card-title">İstifadəçilər</h5>
+        <h5 style="padding: 1.25em" class="card-title">İstifadəçilər</h5>
     </div>
     <div class="card-body d-flex">
 
@@ -33,7 +33,7 @@ $(document).ready(function(){
         @if (groups != null)
         {
             <form method="get" class="ml-4">
-                <select name="groupId" class="form-select" style="font-size: 1.2rem" aria-label="Qrup Seçin" onchange="this.form.submit()">
+                <select name="groupId" class="form-select" style="font-size: 1.6rem" aria-label="Qrup Seçin" onchange="this.form.submit()">
                     @if (selectedGroupId == 0)
                     {
                         <option value="" selected>Qrup Seçin</option>
@@ -67,7 +67,7 @@ $(document).ready(function(){
             {
                 <input type="checkbox" id="chkActives" name="chkActives" onclick="ActivesFilterChecked()">
             }
-            <label for="chkActives" class="mr-2">Aktivlər</label><br>
+            <label for="chkActives" class="mx-2 my-0">Aktivlər</label><br>
         </div>
         <input id="myInput" type="text" placeholder="Axtar..">
     </div>
@@ -102,7 +102,11 @@ $(document).ready(function(){
             <td>@d.UserPID</td>
             <td>@Html.CheckBoxFor(m => d.IsActive, new { onclick = "return false" })</td>
 
-            <td>
+            <td style="display: flex;gap: 10px;">
+                <a asp-controller="Users" asp-action="MenuPermission" asp-route-id="@d.UserId" style="text-wrap: nowrap;display: flex;justify-content: center;align-content: center;align-items: center;gap: 5px;" type="button" class="btn btn-primary">
+                    <i class="fas fa-edit"></i>
+                    Edit Menu Permission
+                </a>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         ...

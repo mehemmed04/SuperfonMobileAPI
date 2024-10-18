@@ -3,28 +3,26 @@
 }
 
 
-@using (Html.BeginForm(actionName:"AddMenuPermission",controllerName:"Users", method: FormMethod.Post))
+@using (Html.BeginForm(actionName: "AddMenuPermission", controllerName: "Users", method: FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
-<div class="form-horizontal">
-    <hr />
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-    @Html.HiddenFor(model => model.UserId)
+    <div class="form-horizontal">
+        <hr/>
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.UserId)
         <div class="form-group">
-        @Html.LabelFor(model => model.MenuPermissionIdAdd, htmlAttributes: new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            <select id="drpEmpList" class="form-control" asp-for="MenuPermissionIdAdd" asp-items="@(new SelectList(ViewData["AllMenuPermissions"] as IEnumerable<MenuPermissionReadDTO> , "MenuPermissionId", "PermissionName"))">  
-                    <option value="">--Seçin--</option>  
-            </select>  
-                <input type="hidden" asp-for="MenuPermissionIdAdd" />  
+            @Html.LabelFor(model => model.MenuPermissionIdAdd, htmlAttributes: new { @class = "control-label col-md-2" })
+            <select required="required" id="drpEmpList" class="form-control" asp-for="MenuPermissionIdAdd" asp-items="@(new SelectList(ViewData["AllMenuPermissions"] as IEnumerable<MenuPermissionReadDTO>, "MenuPermissionId", "PermissionName"))">
+                <option value="">--Seçin--</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="hidden" asp-for="MenuPermissionIdAdd"/>
+            <input style="width: 100%;font-size: 1.2rem;font-family: Poppins, serif;font-weight: 700;" type="submit" value="Əlavə Et" class="btn btn-success"/>
         </div>
     </div>
-
-    <input type="submit" value="Əlavə Et" class="btn btn-success" />
-</div>
 }
-
 
 
 <table class="table table-bordered table-responsive table-hover">
@@ -35,34 +33,34 @@
     </tr>
     @foreach (var d in Model.MenuPermissions)
     {
-<tr>
-    <td>@d.MenuPermissionId</td>
-    <td>@d.PermissionName</td>
-    <td>@using (Html.BeginForm(actionName: "DeleteMenuPermission",controllerName: "Users", method: FormMethod.Post,routeValues: new Dictionary<string, object> { { "userId",Model.UserId },{ "menuPermissionId",d.MenuPermissionId } }))
-                {  <input type="submit" value="Sil">
-    }
-    </td>
-</tr>
-
+        <tr>
+            <td>@d.MenuPermissionId</td>
+            <td>@d.PermissionName</td>
+            <td>
+                @using (Html.BeginForm(actionName: "DeleteMenuPermission", controllerName: "Users", method: FormMethod.Post, routeValues: new Dictionary<string, object> { { "userId", Model.UserId }, { "menuPermissionId", d.MenuPermissionId } }))
+                {
+                    <input type="submit" value="Sil">
+                }
+            </td>
+        </tr>
     }
 </table>
 
-@if(Model.MenuPermissionsFromGroup != null)
+@if (Model.MenuPermissionsFromGroup != null)
 {
     <span>Aidiyyatı qrup səlahiyyətləri (@ViewData["UserGroupName"])</span>
-    <br />
+    <br/>
     <table class="table table-bordered table-responsive table-hover">
-    <tr>
-        <th>Id </th>
-        <th>Səlahiyyət Adı </th>
-    </tr>
-    @foreach (var d in Model.MenuPermissionsFromGroup)
-    {
-<tr>
-    <td>@d.MenuPermissionId</td>
-    <td>@d.PermissionName</td>
-</tr>
-
-    }
-</table>
+        <tr>
+            <th>Id </th>
+            <th>Səlahiyyət Adı </th>
+        </tr>
+        @foreach (var d in Model.MenuPermissionsFromGroup)
+        {
+            <tr>
+                <td>@d.MenuPermissionId</td>
+                <td>@d.PermissionName</td>
+            </tr>
+        }
+    </table>
 }
