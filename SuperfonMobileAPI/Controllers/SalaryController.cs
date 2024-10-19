@@ -111,8 +111,13 @@ namespace SuperfonMobileAPI.Controllers
             string salesmanCode = "101";
             string moduleSign = "F";
             var data = await tigerData.GetSalaryPayrollById(id);
+
+            if (data == null)
+                return BadRequest(false);
+
             var personnelData = await tigerData.GetEFlowPersonnel(user.UserPID);
             var cardTigerData = await tigerData.GetCardByCode(personnelData.MAAS_CARI_KODU);
+
             string docno = data.Year.ToString() + data.Month.ToString() + moduleSign + data.Id.ToString();
             string txtQRCode = $"{cardTigerData?.CardId} - {cardTigerData?.CardCode} - {salesmanCode} - {data.SalaryTotal} - {opType} - {docno} - {data.PersonName} \n";
 
