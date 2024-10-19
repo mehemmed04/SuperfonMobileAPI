@@ -70,8 +70,16 @@ namespace SuperfonMobileAPI.Controllers
             string salesmanCode = "101";
             string moduleSign = "U";
             var data = await sfContext.RepairmanRequests.FindAsync(requestId);
+
+            if (data == null)
+                return BadRequest(false);
+
             var user = await sfContext.Users.FindAsync(data.UserId);
             var cardData = await sfContext.UserCardCodePermissions.Where(x => x.UserId == user.UserId && x.CardPermissionTypeId == 1).FirstOrDefaultAsync();
+
+            if (cardData == null)
+                return BadRequest("There is no card data for this user");
+
             //var personnelData = await tigerData.GetEFlowPersonnel(user.UserPID);
             var cardTigerData = await tigerData.GetCardByCode(cardData.CardCode); //personnelData.ISAVANS_CARI_KODU
             string docno = data.RequestDate.ToString("yyMMdd") + moduleSign + data.RepairmanRequestId.ToString();
@@ -93,12 +101,6 @@ namespace SuperfonMobileAPI.Controllers
                 result["textData"] = txtQRCode;
                 return Ok(result);
             }
-
-            
         }
-
-
-
-
     }
 }

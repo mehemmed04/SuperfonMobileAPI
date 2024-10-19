@@ -89,6 +89,10 @@ namespace SuperfonMobileAPI.Controllers
             string salesmanCode = "101";
             string moduleSign = "C";
             var data = await tigerData.GetCashout(id);
+
+            if (data == null)
+                return BadRequest(false);
+
             var cardTigerData = await tigerData.GetCardByCode(data.CardCode);
             string docno = data.RequestDate.Year.ToString() + data.RequestDate.Month.ToString() + moduleSign + data.Id.ToString();
             string txtQRCode = $"{cardTigerData?.CardId} - {cardTigerData?.CardCode} - {salesmanCode} - {data.Amount} - {opType} - {docno} - {data.PersonName} \n";

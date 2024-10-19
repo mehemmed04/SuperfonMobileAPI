@@ -241,6 +241,10 @@ namespace SuperfonMobileAPI.Controllers
             string salesmanCode = "101";
             string moduleSign = "A";
             var data = await sfContext.ExpenseAdvanceRequests.FindAsync(requestId);
+
+            if (data == null)
+                return BadRequest(false);
+
             var user = await sfContext.Users.FindAsync(data.UserId);
             var userEFlowData = await tigerData.GetEFlowPersonnel(user.UserPID);
             // var cardData = await sfContext.UserCardCodePermissions.Where(x => x.UserId == user.UserId && x.CardPermissionTypeId == 1).FirstOrDefaultAsync();
